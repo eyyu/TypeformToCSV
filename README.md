@@ -16,5 +16,6 @@ $ Main.py
 
 ## To-Do:
 - Display Tables
+- Add API key prompt
 - Ensure Python 2.7 compatibility
 - Cross Compatibility tests: Windows
