@@ -25,16 +25,28 @@ typeformAPI = 'https://api.typeform.com/v1'
 # insert API key here!
 apikey = ''
 
-# make sure API Key is here
+# make sure there is API Key 
 if not apikey:
     sys.stderr.write('Oops! We could not detect an API Key.\n')
     sys.stderr.write('Please insert an API key into line 25.\n')
+    input() # wait
     exit()
+
+def checkRequestStatus(status):
+	""" Check if Request status is HTTP OK (200) 
+	if not, proceed to print an err and exit program 
+	"""
+	reqErrMsg = 'Oops! We encountered an http error: {}\n'
+	if status != 200:
+	    sys.stderr.write (reqErrMsg.format(status))
+	    input() # wait
+	    exit()
+
+# Script Begins Here: 
 
 # request values
 payload = {}
 payload['key'] = apikey
-reqErrMsg = 'Oops! We encountered an http error: {}\n'
 
 #getForms url formatting
 getForms = '{}/forms'.format(typeformAPI)
@@ -43,9 +55,7 @@ getForms = '{}/forms'.format(typeformAPI)
 forms = requests.get(getForms, params = payload)
 
 # check status
-if forms.status_code != 200:
-    sys.stderr.write (reqErrMsg.format(forms.status_code))
-    exit()
+checkRequestStatus(forms.status_code)
 
 # add submitted forms to payload
 payload['completed'] = 'true'
@@ -62,9 +72,8 @@ for form in forms.json():
     data = requests.get(getFormData, params = payload)
 
     # check status
-    if data.status_code != 200:
-        sys.stderr.write (reqErrMsg.format(data.status_code))
-        exit()
+    checkRequestStatus(data.status_code)
+
 
     # store all question fields
     fields = []
@@ -78,7 +87,7 @@ for form in forms.json():
         current = {}
         for field in fields:
             answer = res['answers'].get(field)
-            if answer == None:
+            if not answer:
                 answer = NaN
             current[field] = answer
         answers.append(current)
@@ -86,7 +95,7 @@ for form in forms.json():
     timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime())
     filename = '{}_{}.csv'.format(formName,timestamp)
     # open a csv file and write the data
-    with open(filename, 'w') as csvfile:
+    with open(filename, 'w', newline='') as csvfile:
          writer = csv.DictWriter(csvfile, fieldnames=fields)
          writer.writeheader()
          writer.writerows(answers)
