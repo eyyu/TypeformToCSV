@@ -9,7 +9,7 @@ It's as easy as 1, 2 ,3!
 $ git clone https://github/eyyu/TypeformToCSV.git
 ```
 2. Open Main.py and insert the Typeform API key in line 25
-3. Run the script! Double click or run the following on command line:
+3. Run the script! Double click or run the following on command line:   
 Linux:
 ```
 $ ./Main.py
