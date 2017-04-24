@@ -21,4 +21,5 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - Fix missing date in LICSENCE.
 
-[Unrealeased]: https://github.com/eyyu/TypeformToCSV/
+[0.0.1]: https://github.com/eyyu/TypeformToCSV/commit/728d04fbfb40ac3cdeb611c34ef4cb5a359ac2a9
+[0.0.0]: https://github.com/eyyu/TypeformToCSV/commit/acaacef48812d69121d73729908b5fdb7e87fcb2
