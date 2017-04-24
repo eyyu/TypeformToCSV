@@ -38,9 +38,6 @@ You might not have permissions! Try:
 $ chmod 755 Main.py
 ```
 
-
 ## To-Do:
 - Add API key prompt
 - Data validation
-- Ensure Python 2.7 compatibility
-- Cross Compatibility tests: Windows
