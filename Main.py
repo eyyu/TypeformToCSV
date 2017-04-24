@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+
 """ Simple little Typeform-to-CSV parser
-1) insert your Typeform API key into apikey field
-2) run script
+1) insert your Typeform API key into apikey field ( Line 25 )
+2) Run Script
 
 Notes:
 - each form will generate a csv file
@@ -13,6 +14,7 @@ __copyright__   = "Copyright 2017, Eva Yu"
 __license__     = "MIT"
 __version__     = "0.0.1"
 
+import sys
 import csv
 import json
 import requests
@@ -23,38 +25,56 @@ typeformAPI = 'https://api.typeform.com/v1'
 # insert API key here!
 apikey = ''
 
-payload = {}
-getForms = '{}/forms'.format(typeformAPI)
-payload['key'] = apikey
-forms = requests.get(getForms, params = payload).json()
+# make sure API Key is here
+if not apikey:
+    sys.stderr.write('Oops! We could not detect an API Key.\n')
+    sys.stderr.write('Please insert an API key into line 25.\n')
+    exit()
 
-# add data to next payload
+# request values
+payload = {}
+payload['key'] = apikey
+reqErrMsg = 'Oops! We encountered an http error: {}\n'
+
+#getForms url formatting
+getForms = '{}/forms'.format(typeformAPI)
+
+#first request gets all the forms as json
+forms = requests.get(getForms, params = payload)
+
+# check status
+if forms.status_code != 200:
+    sys.stderr.write (reqErrMsg.format(forms.status_code))
+    exit()
+
+# add submitted forms to payload
 payload['completed'] = 'true'
-for form in forms:
-    #form id
+
+# iterate through all the forms found
+for form in forms.json():
     fid = form['id']
     formName = form['name']
 
-    # make a request for submitted form data
+    # format getFormData request
     getFormData =  '{}/form/{}'.format(typeformAPI, fid)
 
-    # get the form data as json
-    data = requests.get(getFormData, params = payload).json()
+    # get the form data
+    data = requests.get(getFormData, params = payload)
 
     # check status
-    if data['http_status'] != 200:
-        eprint ( 'Oops! We encoutnered an http error: ' + data['http_status'])
+    if data.status_code != 200:
+        sys.stderr.write (reqErrMsg.format(data.status_code))
         exit()
 
     # store all question fields
     fields = []
-    for q in data['questions']:
+    for q in data.json()['questions']:
         fields.append(q['id'])
 
     # store the data in the submissions
     NaN = 'NaN'
     answers = []
-    for res in data['responses']:
+    for res in data.json()['responses']:
         current = {}
         for field in fields:
             answer = res['answers'].get(field)
@@ -63,9 +83,9 @@ for form in forms:
             current[field] = answer
         answers.append(current)
 
-    # open a csv file and write the data
     timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime())
     filename = '{}_{}.csv'.format(formName,timestamp)
+    # open a csv file and write the data
     with open(filename, 'w') as csvfile:
          writer = csv.DictWriter(csvfile, fieldnames=fields)
          writer.writeheader()
